@@ -20,7 +20,7 @@ void ChunkLoader::Initialize(int threadNum)
 {
     assert(threads_.empty());
     if(threadNum <= 0)
-        threadNum = (std::max)(4u, std::thread::hardware_concurrency()) - 2;
+        threadNum = (std::max)(3u, std::thread::hardware_concurrency()) - 2;
 
     running_ = true;
     while(threadNum-- > 0)

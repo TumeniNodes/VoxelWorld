@@ -7,5 +7,5 @@ MSAA = 4
 
 [World]
 
-PreloadDistance = 10
-RenderDistance  = 8
+PreloadDistance = 14
+RenderDistance  = 12

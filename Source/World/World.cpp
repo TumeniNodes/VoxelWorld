@@ -9,7 +9,7 @@ Created by AirGuanZ
 #include "World.h"
 
 World::World(int preloadDis, int renderDis)
-    : ckMgr_(preloadDis, renderDis, 8, 8, 13, 400, 500, renderDis)
+    : ckMgr_(preloadDis, renderDis, 8, 8, 15, 400, 500, renderDis)
 {
 
 }

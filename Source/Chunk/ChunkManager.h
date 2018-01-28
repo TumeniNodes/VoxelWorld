@@ -140,6 +140,7 @@ private:
     
     std::unordered_set<IntVector3, IntVector3Hasher> importantModelUpdates_;
     std::unordered_set<IntVector3, IntVector3Hasher> unimportantModelUpdates_;
+    std::unordered_set<IntVector3, IntVector3Hasher> uniModelWaiting_;
 
     int maxImpModelUpdates_;
     int maxUniModelUpdates_;

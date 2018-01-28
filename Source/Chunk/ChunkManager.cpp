@@ -260,6 +260,22 @@ void ChunkManager::AddChunkData(Chunk *ck, const std::vector<IntVector3> &lightU
         for(int section = 0; section != CHUNK_SECTION_NUM; ++section)
             unimportantModelUpdates_.insert({ pos.x, section, pos.z });
     }
+
+    for(int dx = -1; dx <= 1; ++dx)
+    {
+        for(int dz = -1; dz <= 1; ++dz)
+        {
+            for(int sec = 0; sec != CHUNK_SECTION_NUM; ++sec)
+            {
+                IntVector3 p = { pos.x + dx, sec, pos.z + dz };
+                if(uniModelWaiting_.find(p) != uniModelWaiting_.end())
+                {
+                    uniModelWaiting_.erase(p);
+                    unimportantModelUpdates_.insert(p);
+                }
+            }
+        }
+    }
 }
 
 void ChunkManager::AddSectionModel(const IntVector3 &pos, ChunkSectionModels *models)
@@ -566,15 +582,21 @@ void ChunkManager::ProcessModelUpdates(void)
     int updatesCount = 0;
     while(!importantModelUpdates_.empty() && updatesCount < maxImpModelUpdates_)
     {
+        ++updatesCount;
+
         IntVector3 pos = *importantModelUpdates_.begin();
         importantModelUpdates_.erase(pos);
 
         auto it = chunks_.find({ pos.x, pos.z });
         if(it == chunks_.end())
             continue;
+        if(!InRenderRange(pos.x, pos.z))
+        {
+            it->second->SetModel(pos.y, nullptr);
+            continue;
+        }
         ChunkModelBuilder builder(this, it->second, pos.y);
         AddSectionModel(pos, builder.Build());
-        ++updatesCount;
     }
 
     //然后才处理不重要更新
@@ -583,16 +605,35 @@ void ChunkManager::ProcessModelUpdates(void)
           uniUpdatesCount < maxUniModelUpdates_ &&
           updatesCount < maxModelUpdates_)
     {
+        ++updatesCount;
+        ++uniUpdatesCount;
+
         IntVector3 pos = *unimportantModelUpdates_.begin();
         unimportantModelUpdates_.erase(pos);
 
         auto it = chunks_.find({ pos.x, pos.z });
         if(it == chunks_.end())
             continue;
+
+        if(!InRenderRange(pos.x, pos.z))
+        {
+            it->second->SetModel(pos.y, nullptr);
+            continue;
+        }
+
+        for(int dx = -1; dx <= 1; ++dx)
+        {
+            for(int dz = -1; dz <= 1; ++dz)
+            {
+                if(chunks_.find({ pos.x + dx, pos.z + dz }) == chunks_.end())
+                {
+                    uniModelWaiting_.insert(pos);
+                    continue;
+                }
+            }
+        }
         ChunkModelBuilder builder(this, it->second, pos.y);
         AddSectionModel(pos, builder.Build());
-        ++updatesCount;
-        ++uniUpdatesCount;
     }
 }
 
